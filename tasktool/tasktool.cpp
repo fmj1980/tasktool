@@ -12,7 +12,9 @@
 using namespace pcutil;
 
 #define TASK_ARRANGE 0
-#define TASK_ANALYZE 1
+#define TASK_ANALYZE 0
+#define TASK_RENAME 1
+
 int ArrangeTask( string nowTime ) 
 {
 	string exePath = CT2A( CFileHelper::GetAppPath() );
@@ -313,10 +315,86 @@ void analyzeCSV( string nowTime ){
 	CFileHelper::WriteAllText( CommonHelper::ToCString(outputFile), CommonHelper::ToCString(contents) );
 }
 
+void RenameFiles(string time) {
+
+	cout << "输入重文件夹的路径，直接回车表示当前目录：" << endl;
+
+	char str[MAX_PATH] = { '\0' };
+	cin.getline(str, MAX_PATH);
+
+	string tasksPath;
+	if (strlen(str) == 0)
+	{
+		tasksPath = CT2A(CFileHelper::GetAppPath());
+	}
+	else
+	{
+		tasksPath = str;
+	}
+
+	char fileFound[500];
+	WIN32_FIND_DATAA info;
+	HANDLE hp;
+	sprintf_s(fileFound, "%s\\*.*", tasksPath.c_str());
+	hp = FindFirstFileA(fileFound, &info);
+	if (!hp || hp == INVALID_HANDLE_VALUE)
+	{
+		cout << "没有找到工作文件目录" << endl;
+		return;
+	}
+
+	char renameDictory[500];
+	sprintf_s(renameDictory, "%s\\RenameFiles", tasksPath.c_str());
+	::CreateDirectoryA(renameDictory,NULL);
+
+	cout << "正在读取tasks目录下的文件！" << endl;
+	do
+	{
+		if (((strcmp(info.cFileName, ".") == 0) || (strcmp(info.cFileName, "..") == 0)))
+		{
+			continue;
+		}
+		if ((info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY)
+		{
+			continue;
+		}
+		else
+		{
+			char fileSrc[500];
+			char fileDesct[500];
+		
+			sprintf_s(fileSrc, "%s\\%s", tasksPath.c_str(), info.cFileName);
+			sprintf_s(fileDesct, "%s\\%s.%s", renameDictory,time.c_str(), PathFindFileNameA(info.cFileName));
+			
+			BOOL result = ::CopyFileA(fileSrc, fileDesct,FALSE);
+			if (!result)
+			{
+				DWORD error = GetLastError();
+				cout << "文件处理失败" << info.cFileName << error << endl;
+			}
+			else
+			{
+				cout << "复制文件文件：" << info.cFileName << "到:" << fileDesct << endl;
+			}
+		}
+	} while (FindNextFileA(hp, &info));
+	
+	cout << "完成" << endl;
+	getchar();
+	::FindClose(hp);
+}
+
+
 using namespace pcutil;
 int _tmain(int argc, _TCHAR* argv[])
 {
-	string nowTime =  CommonHelper::ToString( CPcTime::Now().ToLocalDateTime().ToString( EDateFormat::PYYYYMMDDHHmmss ) );
+	string nowTime =  CommonHelper::ToString( CPcTime::Now().ToLocalDateTime().ToString( EDateFormat::PYYYYMMDDHHmmss) );
+
+#if TASK_RENAME
+	RenameFiles(nowTime);
+
+#endif
+
 #if TASK_ARRANGE
 	cout <<  "开始比较tasks.csv文件和tasks目录下的文件：" << endl;
 	ReadTask( nowTime );
