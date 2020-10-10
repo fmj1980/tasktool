@@ -11,7 +11,7 @@
 #include <tchar.h>
 
 #define WEAVERLIB_API_UTILS
-
+#define _SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS
 // TODO: reference additional headers your program requires here
 
 #include <sstream>
@@ -58,3 +58,5 @@
 using namespace std;
 
 #pragma warning(disable:4251)
+
+extern int g_skipCount;

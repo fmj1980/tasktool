@@ -384,10 +384,12 @@ void RenameFiles(string time) {
 	::FindClose(hp);
 }
 
-
+extern void CaculateLibaryBook();
 using namespace pcutil;
 int _tmain(int argc, _TCHAR* argv[])
 {
+	CaculateLibaryBook();
+
 	string nowTime =  CommonHelper::ToString( CPcTime::Now().ToLocalDateTime().ToString( EDateFormat::PYYYYMMDDHHmmss) );
 
 #if TASK_RENAME

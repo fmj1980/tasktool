@@ -2,6 +2,7 @@
 #include "CSVFile.h"   
 #include <assert.h>   
 
+int g_skipCount = 0;
 namespace pcutil
 {
 	void    CSVFile::ReadCSVHead()   
@@ -9,7 +10,7 @@ namespace pcutil
 		char strHeadLine[4096];   
 		m_CSVFile.getline(strHeadLine, sizeof(strHeadLine));   
 
-		RowParse(strHeadLine, sizeof(strHeadLine), m_CSVHead);   
+		RowParse(strHeadLine + g_skipCount, sizeof(strHeadLine), m_CSVHead);
 	}   
 
 	void    CSVFile::RowParse(const char* strRow, int nSize, ROWVEC& result)   
